@@ -16,6 +16,10 @@
     <link rel="stylesheet" href="assets/css/custom.css" />
 
     <style>
+      html {
+        scroll-behavior: smooth;
+      }
+
       body {
         margin: 0;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -110,9 +114,87 @@
       .subtitle {
         text-align: center;
         margin-top: -0.5rem;
-        margin-bottom: 2rem;
+        margin-bottom: 0.75rem;
         color: #b9b2a8;
         font-size: 1rem;
+      }
+
+      .trust-box {
+        background: #151515;
+        border: 1px solid #3a3a3a;
+        border-radius: 10px;
+        padding: 1rem;
+        margin: 1.5rem 0 2rem;
+        color: #e4dcd0;
+      }
+
+      .trust-box h3 {
+        margin: 0 0 0.75rem;
+        color: #ffa500;
+        font-size: 1.15rem;
+        text-align: center;
+      }
+
+      .trust-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .trust-list li {
+        margin: 0.55rem 0;
+        line-height: 1.35;
+      }
+
+      .trust-list li::before {
+        content: "✓";
+        color: #ffa500;
+        font-weight: 800;
+        margin-right: 0.5rem;
+      }
+
+      .quick-contact {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+
+      .quick-contact a {
+        display: block;
+        text-align: center;
+        padding: 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #444;
+        color: #e4dcd0;
+        text-decoration: none;
+        font-weight: 700;
+        background: #222;
+      }
+
+      .form-note {
+        text-align: center;
+        color: #b9b2a8;
+        font-size: 0.95rem;
+        margin: -0.5rem 0 1.25rem;
+      }
+
+      .small-note {
+        color: #b9b2a8;
+        font-size: 0.9rem;
+        margin-top: 0.35rem;
+      }
+
+      @media (max-width: 480px) {
+        main {
+          margin: 1.5rem auto;
+          padding: 1.25rem;
+          padding-top: 4rem;
+        }
+
+        .quick-contact {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
@@ -139,8 +221,23 @@
 
     <main>
       <h2>Boka Knivslipning</h2>
-      <p class="subtitle">Välj när du vill att vi hämtar dina knivar.</p>
-      <p class="subtitle">OBS! Endast inom Linköping</p>
+      <p class="subtitle">Hämtning, slipning och återlämning inom Linköping.</p>
+
+      <section class="trust-box" aria-label="Kort information om Knivkalle">
+        <h3>Så funkar det:</h3>
+        <ul class="trust-list">
+          <li>Jag hämtar knivarna vid dörren inom Linköping.</li>
+          <li>Slipning sker med professionell utrustning.</li>
+          <li>Du får tillbaka knivarna samma dag.</li>
+          <li>Betala först när knivarna är återlämnade.</li>
+        </ul>
+        <div class="quick-contact">
+          <a href="tel:+46708440938">📞 Ring direkt</a>
+          <a href="#bookingForm">🗓️ Boka online</a>
+        </div>
+      </section>
+
+      <p class="form-note">Välj datum och tid nedan för upphämtning.</p>
       <!--
         IMPORTANT:
         - Den här POST:ar direkt till n8n (Production URL).
@@ -152,7 +249,7 @@
         action="https://hooks.knivkalle.se/webhook/bokning"
         method="POST"
       >
-        <label>Tillgängliga datum:</label>
+        <label>Tillgängliga datum för upphämtning:</label>
         <div
           id="dateList"
           style="display: grid; grid-template-columns: 1fr; gap: 0.5rem"
@@ -161,12 +258,12 @@
         <!-- Skickas med (val av datum) -->
         <input type="hidden" id="date" name="date" required />
 
-        <label for="time">Välj tid:</label>
+        <label for="time">Välj tid för upphämtning:</label>
         <select id="time" name="time" required>
           <option value="" selected disabled>Välj ett datum först</option>
         </select>
 
-        <label for="knives">Antal knivar:</label>
+        <label for="knives">Antal knivar (minst 2):</label>
         <input
           type="number"
           id="knives"
@@ -185,7 +282,7 @@
         <label for="phone">Telefonnummer:</label>
         <input type="tel" id="phone" name="phone" required />
 
-        <label for="address">Adress för upphämtning:</label>
+        <label for="address">Adress för upphämtning inom Linköping:</label>
         <input type="text" id="address" name="address" required />
 
         <label for="notes">Övrigt (valfritt):</label>
@@ -201,6 +298,9 @@
         />
 
         <div class="price" id="priceDisplay">Pris: -</div>
+        <p class="small-note">
+          Du får en bekräftelse efter bokning. Betalning sker efter återlämning.
+        </p>
 
         <input type="submit" id="submitBtn" value="Boka" />
       </form>
