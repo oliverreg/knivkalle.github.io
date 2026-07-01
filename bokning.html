@@ -479,6 +479,27 @@
         box-shadow: 0 0 0 2px rgba(51, 157, 255, 0.35);
       }
 
+      main .time-option.unavailable,
+      main .time-option.unavailable:hover,
+      main .time-option:disabled {
+        background: #101010;
+        color: #4e4a45;
+        border-color: rgba(255, 255, 255, 0.045);
+        box-shadow: none;
+        cursor: not-allowed;
+        opacity: 1;
+        transform: none;
+      }
+
+      main .time-option.unavailable::after {
+        content: "";
+        display: block;
+        width: 1.2rem;
+        height: 1px;
+        margin: 0.22rem auto 0;
+        background: rgba(228, 220, 208, 0.18);
+      }
+
       main .time-option:focus-visible,
       main .calendar-day-btn:focus-visible,
       main .calendar-nav-btn:focus-visible {
@@ -803,6 +824,17 @@
         );
       }
 
+      function getStandardPickupTimes() {
+        const times = [];
+
+        for (let hour = 8; hour <= 17; hour++) {
+          times.push(`${pad2(hour)}:00`);
+          times.push(`${pad2(hour)}:20`);
+        }
+
+        return times;
+      }
+
       function getMinDateYMD() {
         const now = new Date();
         const tomorrow = new Date(now);
@@ -878,6 +910,10 @@
       }
 
       function chooseTime(ymd, time) {
+        if (!isAllowed(ymd, time)) {
+          return;
+        }
+
         selectedDate = ymd;
         dateHiddenInput.value = ymd;
         timeInput.value = time;
@@ -953,7 +989,8 @@
           return;
         }
 
-        const times = availability?.allowed?.[selectedDate] || [];
+        const allowedTimes = availability?.allowed?.[selectedDate] || [];
+        const standardTimes = getStandardPickupTimes();
 
         const title = document.createElement("p");
         title.className = "time-panel-title";
@@ -963,36 +1000,48 @@
         const grid = document.createElement("div");
         grid.className = "time-grid";
 
-        for (const t of times) {
+        for (const t of standardTimes) {
+          const isAvailable = allowedTimes.includes(t);
+
           const timeBtn = document.createElement("button");
           timeBtn.type = "button";
           timeBtn.className = "time-option";
           timeBtn.dataset.ymd = selectedDate;
           timeBtn.dataset.time = t;
           timeBtn.textContent = t;
-          timeBtn.setAttribute(
-            "aria-label",
-            `Välj ${formatDateSV(selectedDate)} klockan ${t}`,
-          );
 
-          if (timeInput.value === t) {
-            timeBtn.classList.add("selected");
-            timeBtn.setAttribute("aria-pressed", "true");
-          } else {
-            timeBtn.setAttribute("aria-pressed", "false");
-          }
+          if (isAvailable) {
+            timeBtn.setAttribute(
+              "aria-label",
+              `Välj ${formatDateSV(selectedDate)} klockan ${t}`,
+            );
 
-          timeBtn.addEventListener("pointerdown", (event) => {
-            if (event.pointerType === "mouse" && event.button !== 0) {
-              return;
+            if (timeInput.value === t) {
+              timeBtn.classList.add("selected");
+              timeBtn.setAttribute("aria-pressed", "true");
+            } else {
+              timeBtn.setAttribute("aria-pressed", "false");
             }
 
-            chooseTime(selectedDate, t);
-          });
+            timeBtn.addEventListener("pointerdown", (event) => {
+              if (event.pointerType === "mouse" && event.button !== 0) {
+                return;
+              }
 
-          timeBtn.addEventListener("click", () => {
-            chooseTime(selectedDate, t);
-          });
+              chooseTime(selectedDate, t);
+            });
+
+            timeBtn.addEventListener("click", () => {
+              chooseTime(selectedDate, t);
+            });
+          } else {
+            timeBtn.classList.add("unavailable");
+            timeBtn.disabled = true;
+            timeBtn.setAttribute(
+              "aria-label",
+              `${formatDateSV(selectedDate)} klockan ${t} är inte bokningsbar`,
+            );
+          }
 
           grid.appendChild(timeBtn);
         }
